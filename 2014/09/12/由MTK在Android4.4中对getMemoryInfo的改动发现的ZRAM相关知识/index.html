@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识 | 听涛阁</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="缘起在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。
+调查Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看/proc/meminfo里面的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识">
+<meta property="og:url" content="http://yoursite.com/2014/09/12/由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识/index.html">
+<meta property="og:site_name" content="听涛阁">
+<meta property="og:description" content="缘起在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。
+调查Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看/proc/meminfo里面的">
+<meta property="og:updated_time" content="2015-11-03T08:44:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识">
+<meta name="twitter:description" content="缘起在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。
+调查Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看/proc/meminfo里面的">
+  
+    <link rel="alternative" href="/atom.xml" title="听涛阁" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="null" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Tao</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">伟大的梦想都始于微不足道</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="/#" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="/#" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+					        
+								<a class="zhihu" target="_blank" href="/#" title="zhihu">zhihu</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/android/" style="font-size: 20px;">android</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">奥巴马的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">卡卡的美丽传说</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">本泽马的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">吉格斯的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">习大大大不同</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://localhost:4000/">托蒂的博客</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">我是谁，我从哪里来，我到哪里去？我就是我，是颜色不一样的吃货…</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Tao</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img lazy-src="null" class="js-avatar">
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Tao</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">伟大的梦想都始于微不足道</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="/#" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="/#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="/#" title="zhihu">zhihu</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2014/09/12/由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识/" class="article-date">
+  	<time datetime="2014-09-11T16:00:00.000Z" itemprop="datePublished">2014-09-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li></ul>
+	</div>
+
+        
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="缘起">缘起</h3><p>在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。</p>
+<h3 id="调查">调查</h3><p>Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看<code>/proc/meminfo</code>里面的MemFree和Cached的总和(不包括Buffers)作为剩余可用内存，其他安全类应用也大都采用了此类方法，但从Android4.4开始，发现MTK在ActivityManagerService.java里加了一些改动<br><a id="more"></a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getMemoryInfo</span><span class="params">(ActivityManager.MemoryInfo outInfo)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> homeAppMem = mProcessList.getMemLevel(ProcessList.HOME_APP_ADJ);</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> cachedAppMem = mProcessList.getMemLevel(ProcessList.CACHED_APP_MIN_ADJ);</span><br><span class="line">    outInfo.availMem = Process.getFreeMemory();</span><br><span class="line">    outInfo.totalMem = Process.getTotalMemory();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// M: We should consider ZRAM for LCA @&#123;</span></span><br><span class="line">    <span class="keyword">if</span> (FeatureOption.MTK_MEMORY_COMPRESSION_SUPPORT) &#123;</span><br><span class="line">        outInfo.availMem += Process.getZramExtraAvailableSize();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">///  @&#125;</span></span><br><span class="line"></span><br><span class="line">    outInfo.threshold = homeAppMem;</span><br><span class="line">    outInfo.lowMemory = outInfo.availMem &lt; (homeAppMem + ((cachedAppMem-homeAppMem)/<span class="number">2</span>));</span><br><span class="line">    outInfo.hiddenAppThreshold = cachedAppMem;</span><br><span class="line">    outInfo.secondaryServerThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.SERVICE_ADJ);</span><br><span class="line">    outInfo.visibleAppThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.VISIBLE_APP_ADJ);</span><br><span class="line">    outInfo.foregroundAppThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.FOREGROUND_APP_ADJ);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>FeatureOption.MTK_MEMORY_COMPRESSION_SUPPORT</code>缺省是设为TRUE的，也就是说在MTK版的Android4.4上，availMem的值等于原来getFreeMemeory()的值加上<strong>zRAM</strong>的额外可用空间的值。</p>
+<h3 id="推测结论">推测结论</h3><p>腾讯手机管家和百度杀毒卫士仍然使用原来的通过查看/proc/meminfo的方法来计算剩余可用内存，而我们采用的时ActivityManager的getMemoryInfo来获取的剩余可用内存，中间差了一个<strong>zRAM</strong>，这就是差距如此悬殊的原因。而<strong>zRAM</strong>又为何物呢？</p>
+<h4 id="以下是来自维基百科上的解释">以下是来自维基百科上的解释</h4><blockquote>
+<p>zRAM是Linux内核的一个模块，之前被称为“compcache”。zram通过在RAM内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于zram可以用内存替代硬盘为系统提供交换空间的功能，zram可以让Linux在需要大量RAM的情况下在内存上进行交换/分页，而提高内存的使用率，显著得减少系统启动时（此时Linux还不能使用外部存储）对内存大小的要求。在物理内存较少的旧电脑上，尤其如此。即使RAM的价格比较低，这项功能仍对上网本和其他低功率的笔记本电脑、虚拟化有优势，尤其是那些使用闪存的嵌入式设备，其寿命有限且依赖于使用频率，因此用作交换时磨损得很快。</p>
+</blockquote>
+<p>因此可以理解为zRAM是将内存来替代磁盘作为Linux的交换分区，并对其存放的内容进行实时压缩以达到提高系统实际内存容量的目的。举个例子，如果有一部内存为512M的手机，开启了zRAM，根据官方的建议，zRAM大小设为总内存的25%，也就是128M，压缩比率为1/3，那么理论上可用的内存空间就变成了768M</p>
+<p>zRAM的技术特点可以看<a href="http://wiki.gentoo.org/wiki/Zram" target="_blank" rel="external">这里</a>，它的前身叫<a href="https://code.google.com/p/compcache/" target="_blank" rel="external">compcache</a>，从09年就在Android的民间开发社区CM上流传开来，在某些论坛里已经有基于Android2.3.x的支持zRAM的内核流出供刷机使用，但效果有限，google直到kitkat(内核版本3.4)才将其正式引入，其实从Linux 3.2版本开始zRAM已经进入内核的staging driver，亦即是处于测试阶段。根据最新的消息，ZRAM将最终将作为Linux Kernel 3.14正式版本的一部分</p>
+<p>zRAM的优点显而易见，通过压缩页面让系统内存更加有效，缺点是增加了CPU的开销，但在目前CPU性能已不是瓶颈的时代，这也不失为一种好的方法。Mac OSX10.9中也采用了类似的技术。</p>
+<h4 id="参考文献：">参考文献：</h4><p><a href="http://www.zhihu.com/question/21932664/answer/19779653" target="_blank" rel="external">http://www.zhihu.com/question/21932664/answer/19779653</a></p>
+<p><a href="http://zh.wikipedia.org/wiki/Zram" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Zram</a></p>
+<p><a href="http://jingyan.baidu.com/article/1612d50079a8e5e20e1eee98.html" target="_blank" rel="external">http://jingyan.baidu.com/article/1612d50079a8e5e20e1eee98.html</a></p>
+<p><a href="http://zhuanlan.zhihu.com/iobject/19608629" target="_blank" rel="external">http://zhuanlan.zhihu.com/iobject/19608629</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/04/09/Linux系统管理笔记/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          Linux系统管理
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/09/02/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hello World</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识" data-title="由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识" data-url="http://yoursite.com/2014/09/12/由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2015 Tao
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>
