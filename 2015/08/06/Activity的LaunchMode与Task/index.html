@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_05.png">
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_06.png">
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png">
-<meta property="og:updated_time" content="2015-11-03T08:43:21.000Z">
+<meta property="og:updated_time" content="2015-11-04T13:07:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Activity的LaunchMode与Task">
 <meta name="twitter:description" content="1. 什么是TaskTask可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：">
@@ -233,33 +233,36 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="1-_什么是Task">1. 什么是Task</h3><p>Task可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：</p>
+        <h2 id="1-_什么是Task">1. 什么是Task</h2><p>Task可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：</p>
 <p><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_01.png" alt="Task"><br><a id="more"></a><br>Android里面控制Activity跳转行为的属性有以下几方面</p>
-<h3 id="2-_Activity的四种launch_mode">2. Activity的四种launch mode</h3><p>Launch mode可以分为从AndroidManifest.xml里静态定义或从代码里使用intent的Flag动态定义来实现，其中动态定义的优先级比静态定义要高，若从AndroidManifest.xml里定义，有以下四种：</p>
-<p><strong>standard(缺省模式)</strong><br>如果没有显式的用android:launchMode来定义，缺省就是这种模式，每次startActivity都会创建一个实例，该实例可以在一个Task中被实例化多次，也可以被实例化到不同的Task中<br>例如在一个Activity里放一个Button，点击该Button时将启动该Activity自己，得到的就是下面的效果。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_02.png" alt="standard mode"></p>
-<p><strong>singleTop</strong><br>如果该Activity位于所在Task栈顶，那么当启动该Activity时不会创建一个新的实例，也就不会重新调用onCreate()方法，而是调用onNewIntent()方法来取而代之，其他情况和standard一致。<br>举个例子：当前有个Task A-B, B位于栈顶，在B上点击某个Button重新启动自己， 如果B是standard模式，Task就会变为A-B-B，如果B为singleTop模式，那么Task仍为A-B，只会调用B的onNewIntent()方法来使B接收intent，但如果B上面还有C，C再启动B，那么无论B是standard还是singleTop，Task都会变为A-B-C-B</p>
+<h2 id="2-_Activity的四种launch_mode">2. Activity的四种launch mode</h2><p>Launch mode可以分为从AndroidManifest.xml里静态定义或从代码里使用intent的Flag动态定义来实现，其中动态定义的优先级比静态定义要高，若从AndroidManifest.xml里定义，有以下四种：</p>
+<p><code>standard(缺省模式)</code><br>如果没有显式的用android:launchMode来定义，缺省就是这种模式，每次startActivity都会创建一个实例，该实例可以在一个Task中被实例化多次，也可以被实例化到不同的Task中<br>例如在一个Activity里放一个Button，点击该Button时将启动该Activity自己，得到的就是下面的效果。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_02.png" alt="standard mode"></p>
+<blockquote>
+<p><strong>注意</strong>：在Android 5.0之后，同一应用内的Activity启动行为和之前一样，但如果是跨应用启动Activity，则会创建一个新的Task，将刚生成的Activity放入新的Task里，这样在近期任务中的显示会相对合理。</p>
+</blockquote>
+<p><code>singleTop</code><br>如果该Activity位于所在Task栈顶，那么当启动该Activity时不会创建一个新的实例，也就不会重新调用onCreate()方法，而是调用onNewIntent()方法来取而代之，其他情况和standard一致。<br>举个例子：当前有个Task A-B, B位于栈顶，在B上点击某个Button重新启动自己， 如果B是standard模式，Task就会变为A-B-B，如果B为singleTop模式，那么Task仍为A-B，只会调用B的onNewIntent()方法来使B接收intent，但如果B上面还有C，C再启动B，那么无论B是standard还是singleTop，Task都会变为A-B-C-B</p>
 <blockquote>
 <p><strong>注意</strong>：如果一个Activity已经被创建完毕，可以通过按Back键来返回上一个Activity，但如果Activity正在处理intent，是无法通过点击Back键来返回的。</p>
 </blockquote>
 <p><strong>B在栈顶</strong><br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_03.png" alt="B在栈顶"><br><strong>B在栈中</strong><br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_04.png" alt="B在栈中"></p>
-<p><strong>singleTask</strong><br>在该模式下，启动一个新的Activiy时会给它创建一个新的Task并把该Activity作为根Activity，如果其他Task中存在该Activity的实例，那么就自动跳转到该Task中，然后调用该Activity的onNewIntent()方法。</p>
+<p><code>singleTask</code><br>在该模式下，如果是同一程序内启动，若之前不存在该Activity实例，那么就会创建一个新的实例和调用者位于同一个Task内，并且处于栈顶位置，如果程序内存在该Activity的实例，那么位于该Activity实例之上的其他Activity实例会被弹出，然后调用该Activity的onNewIntent()方法，如果是跨应用启动，启动一个新的Activiy时会给它创建一个新的Task并把该Activity作为根Activity，如果系统其他Task中存在该Activity的实例，那么就自动跳转到该Task中，如果该Activity上面还有其他Activity的实例，那么其他Activity会被弹出，然后调用该Activity的onNewIntent()方法。</p>
 <blockquote>
 <p><strong>注意</strong>：虽然该Activity在一个新的Task里，但当点击Back键时，还是能够回到调用它的上一个Activity，尽管它们属于不同的Task。<br><strong>注意</strong>：singleTask属性与另一个属性<strong>taskAffinity</strong>息息相关，如果没有明确说明，同一个应用的所有Activity都拥有一个相同的taskAffinity，也就是该应用的包名，在这种情况下，如果当前Task的taskAffinity与该Activity一致，那么直接在该Task中创建，如果不一致则创建一个新的Task。</p>
 </blockquote>
 <p><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_05.png" alt="singleTask"></p>
-<p><strong>singleInstance</strong><br>和singleTask基本一致，也是新建一个Task，只不过该Task里只有该Activity一个实例，如果在同一个应用里有A，B，C三个Activity，其中B为singleInstance，那么当调用顺序为A-B-C时，A和C在一个Task里，B单独在一个Task里，回退顺序也不同，为C-A-B，如果C再启动B，那么顺序如虚线所示。再次启动B会调用B的onNewIntent()方法。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_06.png" alt="singleInstance"></p>
+<p><code>singleInstance</code><br>和singleTask基本一致，也是新建一个Task，只不过该Task里只有该Activity一个实例，如果在同一个应用里有A，B，C三个Activity，其中B为singleInstance，那么当调用顺序为A-B-C时，A和C在一个Task里，B单独在一个Task里，回退顺序也不同，为C-A-B，如果C再启动B，那么顺序如虚线所示。再次启动B会调用B的onNewIntent()方法。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_06.png" alt="singleInstance"></p>
 <p>若通过intent的Flags来动态定义，有以下几种：</p>
 <blockquote>
-<p> FLAG_ACTIVITY_NEW_TASK<br>同singleTask行为一致</p>
+<p> FLAG_ACTIVITY_NEW_TASK<br>和FLAG_ACTIVITY_CLEAR_TOP一起使用时，同singleTask行为一致，否则，若目标Activity没有静态设置singleTask属性，仍然会创建一个新的实例</p>
 <p> FLAG_ACTIVITY_SINGLE_TOP<br>同singleTop行为一致</p>
 <p>FLAG_ACTIVITY_CLEAR_TOP<br>若被启动的Activity已经在当前Task里，那么便不会创建一个新的实例，而是将该Activity之上的Activity全部出站销毁，然后调用该Activity的onNewIntent()方法。</p>
 </blockquote>
 <h3 id="3-_taskAffinity">3. taskAffinity</h3><p>Affinity中文解释是吸引力和亲和性，顾名思义，它是用来将Activity绑在一起的属性，同一Task的所有Activity有相同的affinity，缺省是该Task根Activity的affinity属性。如果不做特殊设置，同一应用里的Activity们拥有相同的affinity，这个affinity通常在application的属性中定义，如果application中也没定义，<strong>那么缺省就是该应用的包名</strong>。你也可以对不同应用的Activity设置同一affinity来使它们位于同一Task内，如果想特别指明某个Activity对任何Task均不存在affinity，那么将其affinity设为空字符串即可。<br>如果一个Intent的Flag被设为了FLAG_ACTIVITY_NEW_TASK，那么对应Activity启动时便会先寻找是否存在taskAffinity相同的Task，如果存在，便将目标Activity压入此Task栈中，如果不存在，则新建一个Task栈并将其放入。</p>
-<h3 id="4-_android:allowReparenting属性">4. android:allowReparenting属性</h3><p>如果某个Activity设置了此属性为true，那么当点击home退到后台时，该Activity将从启动它的task重新宿主到和其affinity相同的task里，举个例子，当某个应用启动了浏览器或地图中的某个页面，如果该页面的allowReparenting被设为true，那么当该应用退到后台再启动时，便发现浏览器或地图页面已不再，这时候如果再点击浏览器或地图应用，发现栈顶的Activity就是之前退到后台的Activity。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png" alt="allowReparenting"></p>
-<h3 id="Launch_Mode_总结">Launch Mode 总结</h3><blockquote>
+<h2 id="4-_android:allowReparenting属性">4. android:allowReparenting属性</h2><p>如果某个Activity设置了此属性为true，那么当点击home退到后台时，该Activity将从启动它的task重新宿主到和其affinity相同的task里，举个例子，当某个应用启动了浏览器或地图中的某个页面，如果该页面的allowReparenting被设为true，那么当该应用退到后台再启动时，便发现浏览器或地图页面已不再，这时候如果再点击浏览器或地图应用，发现栈顶的Activity就是之前退到后台的Activity。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png" alt="allowReparenting"></p>
+<h2 id="5-_Launch_Mode_总结">5. Launch Mode 总结</h2><blockquote>
 <p> <strong>1、standard</strong><br>    1)从task中启动Activity时，该Activity的新实例总是在当前task中创建<br>    2)每次启动Activity，都会创建该Activity类的新实例<br>    3)一个task中可以存在同一Activity的多个实例<br>    4)一个Activity的多个实例可以出现在多个task栈中<br><strong>2、singleTop</strong><br>    1)如果设置为singleTop的Activity实例未处于栈顶，则其表现与设置为standard的Activity的表现一致<br>    2)如果设置为singleTop的Activity的实例位于任务栈的栈顶，则不会创建该Activity的新实例。只是调用位于栈顶的该Activity实例的onNewIntent方法，将新的intent传递给该实例。<br><strong>3、singleTask</strong><br>    1)设置为singleTask的Activity，具有全局唯一性，在Android系统中只能创建该Activity的一个实例。<br>    2)当启动singleTask的Activity时，如果已经存在该Activity的实例，则将该实例之上的所有Activity实例释放，将该实例重新带回到栈顶，并调用它的onNewIntent方法，将新的intent传递给该实例<br>    3)在创建singleTask模式的Activity的实例时，如果当前task的taskAffinity与该Activity的taskAffinity一致，则直接在当前task中创建;如果当前task的taskAffinity值与该Activity的taskAffinity不一致则在新的任务中创建该Activity的实例。<br><strong>4、singleInstance</strong><br>    1)当创建设置为singleInstance模式的Activity时，总是在新的任务中创建<br>    2)设置为SingleInstance模式的Activity，具有全局唯一性。在Android系统中只能存在该Activity的一个实例<br>    3)设置为singleInstance模式的Activity，总是单独在一个task中存在也就是说在该Activity所在的task栈中不可能存在其他的activity</p>
 </blockquote>
-<h3 id="参考文献：">参考文献：</h3><p><a href="http://developer.android.com/guide/components/tasks-and-back-stack.html" target="_blank" rel="external">http://developer.android.com/guide/components/tasks-and-back-stack.html</a><br><a href="http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html" target="_blank" rel="external">http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6761337" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6761337</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6754323" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6754323</a></p>
+<h2 id="参考文献：">参考文献：</h2><p><a href="http://developer.android.com/guide/components/tasks-and-back-stack.html" target="_blank" rel="external">http://developer.android.com/guide/components/tasks-and-back-stack.html</a><br><a href="http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html" target="_blank" rel="external">http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6761337" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6761337</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6754323" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6754323</a></p>
 
       
     </div>
