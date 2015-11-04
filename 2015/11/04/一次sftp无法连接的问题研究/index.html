@@ -3,21 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hello World | 听涛阁</title>
+  <title>一次sftp无法连接的问题研究 | 听涛阁</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+  <meta name="description" content="之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误1234命令: Pass: ************状态: Connected to xxx.xxx.xxx.xxx错误: Connection closed by server with exitcode 127错误: 无法连接到服务器">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2014/09/02/hello-world/index.html">
+<meta property="og:title" content="一次sftp无法连接的问题研究">
+<meta property="og:url" content="http://yoursite.com/2015/11/04/一次sftp无法连接的问题研究/index.html">
 <meta property="og:site_name" content="听涛阁">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
-<meta property="og:updated_time" content="2015-11-03T08:34:05.000Z">
+<meta property="og:description" content="之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误1234命令: Pass: ************状态: Connected to xxx.xxx.xxx.xxx错误: Connection closed by server with exitcode 127错误: 无法连接到服务器">
+<meta property="og:updated_time" content="2015-11-04T12:31:27.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+<meta name="twitter:title" content="一次sftp无法连接的问题研究">
+<meta name="twitter:description" content="之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误1234命令: Pass: ************状态: Connected to xxx.xxx.xxx.xxx错误: Connection closed by server with exitcode 127错误: 无法连接到服务器">
   
     <link rel="alternative" href="/atom.xml" title="听涛阁" type="application/atom+xml">
   
@@ -192,11 +189,11 @@ Quick">
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap"><article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-一次sftp无法连接的问题研究" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2014/09/02/hello-world/" class="article-date">
-  	<time datetime="2014-09-01T16:00:00.000Z" itemprop="datePublished">2014-09-02</time>
+      <a href="/2015/11/04/一次sftp无法连接的问题研究/" class="article-date">
+  	<time datetime="2015-11-04T12:20:06.000Z" itemprop="datePublished">2015-11-04</time>
 </a>
     </div>
   
@@ -209,7 +206,7 @@ Quick">
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      一次sftp无法连接的问题研究
     </h1>
   
 
@@ -217,6 +214,10 @@ Quick">
       
       <div class="article-info article-info-post">
         
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+	</div>
+
         
 
         <div class="clearfix"></div>
@@ -225,15 +226,15 @@ Quick">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+        <p>之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误<br><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">命令: Pass: <span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span></span><br><span class="line">状态: Connected to xxx.xxx.xxx.xxx</span><br><span class="line">错误: Connection closed by server with exitcode 127</span><br><span class="line">错误: 无法连接到服务器</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>但使用putty可以通过ssh正常登录，经过一个小时的折腾，解决方案如下：</p>
+<h3 id="1-_查看sftp-server的配置情况">1. 查看sftp-server的配置情况</h3><p>vim <code>/etc/ssh/sshd_config</code>  在文件末尾可以看到<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Subsystem     sftp     /usr/libexec/openssh/sftp-server</span><br></pre></td></tr></table></figure></p>
+<p>但在libexec路径下并没有openssh目录，使用<code>locate sftp-server</code>命令发现它在这个目录里:<br><code>/usr/lib/openssh/sftp-server</code><br>替换为正确的路径，保存退出</p>
+<h3 id="2-_重启sshd服务">2. 重启sshd服务</h3><p>按照之前的逻辑，采用下面的命令即可重启sshd服务:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/sshd restart</span><br></pre></td></tr></table></figure></p>
+<p>但在我的服务器上对应的目录下并没有sshd, 使用which sshd发现他在<code>/usr/sbin/sshd</code>目录下，但使用<code>/usr/sbin/sshd restart</code>命令时又报出如下错误: <strong>“Extra argument restart”</strong>，看来只能使用其他方式来重启该服务，经过一番搜索，采用如下命令解决该问题：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -HUP $(cat /var/run/sshd.pid)</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>-HUP</code>命令的作用是挂起当前进程，进行复位操作并重新加载配置文件，在这过程中进程并没有停止并重新启动，这种情况下已经建立的ssh连接不会中断。</p>
+<h3 id="3-_重新使用sftp_xxxx@xxx-xxx-xxx-xxx，成功连接">3. 重新使用<code>sftp xxxx@xxx.xxx.xxx.xxx</code>，成功连接</h3><p>参考链接：<br><a href="http://blog.sina.com.cn/s/blog_9d0e7bf10102v62x.html" target="_blank" rel="external">http://blog.sina.com.cn/s/blog_9d0e7bf10102v62x.html</a><br><a href="http://bbs.chinaunix.net/thread-1280806-1-1.html" target="_blank" rel="external">http://bbs.chinaunix.net/thread-1280806-1-1.html</a><br><a href="http://blog.chinaunix.net/uid-20773865-id-113908.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-20773865-id-113908.html</a></p>
 
       
     </div>
@@ -243,15 +244,11 @@ Quick">
     
 <nav id="article-nav">
   
-    <a href="/2014/09/12/由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption"><</strong>
-      <div class="article-nav-title">
-        
-          由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识
-        
-      </div>
-    </a>
   
+    <a href="/2015/08/06/Activity的LaunchMode与Task/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Activity的LaunchMode与Task</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
   
 </nav>
 
@@ -278,7 +275,7 @@ Quick">
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="hello-world" data-title="Hello World" data-url="http://yoursite.com/2014/09/02/hello-world/"></div>
+	<div class="ds-thread" data-thread-key="一次sftp无法连接的问题研究" data-title="一次sftp无法连接的问题研究" data-url="http://yoursite.com/2015/11/04/一次sftp无法连接的问题研究/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
