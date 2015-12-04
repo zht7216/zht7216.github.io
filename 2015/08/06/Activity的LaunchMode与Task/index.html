@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_05.png">
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_06.png">
 <meta property="og:image" content="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png">
-<meta property="og:updated_time" content="2015-11-04T13:07:14.000Z">
+<meta property="og:updated_time" content="2015-12-04T03:19:05.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Activity的LaunchMode与Task">
 <meta name="twitter:description" content="1. 什么是TaskTask可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：">
@@ -113,7 +113,7 @@
 					        
 								<a class="weibo" target="_blank" href="http://weibo.com/1497371880" title="weibo">weibo</a>
 					        
-								<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
 					        
 								<a class="zhihu" target="_blank" href="/#" title="zhihu">zhihu</a>
 					        
@@ -187,7 +187,7 @@
 			        
 						<a class="weibo" target="_blank" href="http://weibo.com/1497371880" title="weibo">weibo</a>
 			        
-						<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
 			        
 						<a class="zhihu" target="_blank" href="/#" title="zhihu">zhihu</a>
 			        
@@ -258,7 +258,7 @@
 <p>FLAG_ACTIVITY_CLEAR_TOP<br>若被启动的Activity已经在当前Task里，那么便不会创建一个新的实例，而是将该Activity之上的Activity全部出站销毁，然后调用该Activity的onNewIntent()方法。</p>
 </blockquote>
 <h3 id="3-_taskAffinity">3. taskAffinity</h3><p>Affinity中文解释是吸引力和亲和性，顾名思义，它是用来将Activity绑在一起的属性，同一Task的所有Activity有相同的affinity，缺省是该Task根Activity的affinity属性。如果不做特殊设置，同一应用里的Activity们拥有相同的affinity，这个affinity通常在application的属性中定义，如果application中也没定义，<strong>那么缺省就是该应用的包名</strong>。你也可以对不同应用的Activity设置同一affinity来使它们位于同一Task内，如果想特别指明某个Activity对任何Task均不存在affinity，那么将其affinity设为空字符串即可。<br>如果一个Intent的Flag被设为了FLAG_ACTIVITY_NEW_TASK，那么对应Activity启动时便会先寻找是否存在taskAffinity相同的Task，如果存在，便将目标Activity压入此Task栈中，如果不存在，则新建一个Task栈并将其放入。</p>
-<h2 id="4-_android:allowReparenting属性">4. android:allowReparenting属性</h2><p>如果某个Activity设置了此属性为true，那么当点击home退到后台时，该Activity将从启动它的task重新宿主到和其affinity相同的task里，举个例子，当某个应用启动了浏览器或地图中的某个页面，如果该页面的allowReparenting被设为true，那么当该应用退到后台再启动时，便发现浏览器或地图页面已不再，这时候如果再点击浏览器或地图应用，发现栈顶的Activity就是之前退到后台的Activity。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png" alt="allowReparenting"></p>
+<h2 id="4-_android:allowTaskReparenting属性">4. android:allowTaskReparenting属性</h2><p>如果某个Activity设置了此属性为true，那么当点击home退到后台时，该Activity将从启动它的task重新宿主到和其affinity相同的task里，举个例子，当某个应用A启动了浏览器或地图中的某个页面，如果该页面的allowTaskReparenting被设为true，那么当该应用A退到后台再启动时，便发现上面的浏览器或地图页面已不再，这时候如果再点击浏览器或地图应用，发现栈顶的Activity就是之前应用A启动的页面。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png" alt="allowTaskReparenting"></p>
 <h2 id="5-_Launch_Mode_总结">5. Launch Mode 总结</h2><blockquote>
 <p> <strong>1、standard</strong><br>    1)从task中启动Activity时，该Activity的新实例总是在当前task中创建<br>    2)每次启动Activity，都会创建该Activity类的新实例<br>    3)一个task中可以存在同一Activity的多个实例<br>    4)一个Activity的多个实例可以出现在多个task栈中<br><strong>2、singleTop</strong><br>    1)如果设置为singleTop的Activity实例未处于栈顶，则其表现与设置为standard的Activity的表现一致<br>    2)如果设置为singleTop的Activity的实例位于任务栈的栈顶，则不会创建该Activity的新实例。只是调用位于栈顶的该Activity实例的onNewIntent方法，将新的intent传递给该实例。<br><strong>3、singleTask</strong><br>    1)设置为singleTask的Activity，具有全局唯一性，在Android系统中只能创建该Activity的一个实例。<br>    2)当启动singleTask的Activity时，如果已经存在该Activity的实例，则将该实例之上的所有Activity实例释放，将该实例重新带回到栈顶，并调用它的onNewIntent方法，将新的intent传递给该实例<br>    3)在创建singleTask模式的Activity的实例时，如果当前task的taskAffinity与该Activity的taskAffinity一致，则直接在当前task中创建;如果当前task的taskAffinity值与该Activity的taskAffinity不一致则在新的任务中创建该Activity的实例。<br><strong>4、singleInstance</strong><br>    1)当创建设置为singleInstance模式的Activity时，总是在新的任务中创建<br>    2)设置为SingleInstance模式的Activity，具有全局唯一性。在Android系统中只能存在该Activity的一个实例<br>    3)设置为singleInstance模式的Activity，总是单独在一个task中存在也就是说在该Activity所在的task栈中不可能存在其他的activity</p>
 </blockquote>

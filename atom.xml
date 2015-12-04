@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[听涛阁]]></title>
+  <subtitle><![CDATA[伟大的梦想都始于微不足道]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://yoursite.com/"/>
+  <updated>2015-11-04T12:31:27.000Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name><![CDATA[Tao]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[一次sftp无法连接的问题研究]]></title>
+    <link href="http://yoursite.com/2015/11/04/%E4%B8%80%E6%AC%A1sftp%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%97%AE%E9%A2%98%E7%A0%94%E7%A9%B6/"/>
+    <id>http://yoursite.com/2015/11/04/一次sftp无法连接的问题研究/</id>
+    <published>2015-11-04T12:20:06.000Z</published>
+    <updated>2015-11-04T12:31:27.000Z</updated>
+    <content type="html"><![CDATA[<p>之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误<br><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">命令: Pass: <span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span></span><br><span class="line">状态: Connected to xxx.xxx.xxx.xxx</span><br><span class="line">错误: Connection closed by server with exitcode 127</span><br><span class="line">错误: 无法连接到服务器</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>但使用putty可以通过ssh正常登录，经过一个小时的折腾，解决方案如下：</p>
+<h3 id="1-_查看sftp-server的配置情况">1. 查看sftp-server的配置情况</h3><p>vim <code>/etc/ssh/sshd_config</code>  在文件末尾可以看到<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Subsystem     sftp     /usr/libexec/openssh/sftp-server</span><br></pre></td></tr></table></figure></p>
+<p>但在libexec路径下并没有openssh目录，使用<code>locate sftp-server</code>命令发现它在这个目录里:<br><code>/usr/lib/openssh/sftp-server</code><br>替换为正确的路径，保存退出</p>
+<h3 id="2-_重启sshd服务">2. 重启sshd服务</h3><p>按照之前的逻辑，采用下面的命令即可重启sshd服务:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/sshd restart</span><br></pre></td></tr></table></figure></p>
+<p>但在我的服务器上对应的目录下并没有sshd, 使用which sshd发现他在<code>/usr/sbin/sshd</code>目录下，但使用<code>/usr/sbin/sshd restart</code>命令时又报出如下错误: <strong>“Extra argument restart”</strong>，看来只能使用其他方式来重启该服务，经过一番搜索，采用如下命令解决该问题：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -HUP $(cat /var/run/sshd.pid)</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>-HUP</code>命令的作用是挂起当前进程，进行复位操作并重新加载配置文件，在这过程中进程并没有停止并重新启动，这种情况下已经建立的ssh连接不会中断。</p>
+<h3 id="3-_重新使用sftp_xxxx@xxx-xxx-xxx-xxx，成功连接">3. 重新使用<code>sftp xxxx@xxx.xxx.xxx.xxx</code>，成功连接</h3><p>参考链接：<br><a href="http://blog.sina.com.cn/s/blog_9d0e7bf10102v62x.html" target="_blank" rel="external">http://blog.sina.com.cn/s/blog_9d0e7bf10102v62x.html</a><br><a href="http://bbs.chinaunix.net/thread-1280806-1-1.html" target="_blank" rel="external">http://bbs.chinaunix.net/thread-1280806-1-1.html</a><br><a href="http://blog.chinaunix.net/uid-20773865-id-113908.html" target="_blank" rel="external">http://blog.chinaunix.net/uid-20773865-id-113908.html</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>之前的Linux服务器使用的是Ubuntu系统，文件传输采用sftp方式，昨天突然无法连接，报出如下错误<br><figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">命令: Pass: <span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span><span class="keyword">*</span></span><br><span class="line">状态: Connected to xxx.xxx.xxx.xxx</span><br><span class="line">错误: Connection closed by server with exitcode 127</span><br><span class="line">错误: 无法连接到服务器</span><br></pre></td></tr></table></figure></p>]]>
+    
+    </summary>
+    
+      <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Activity的LaunchMode与Task]]></title>
+    <link href="http://yoursite.com/2015/08/06/Activity%E7%9A%84LaunchMode%E4%B8%8ETask/"/>
+    <id>http://yoursite.com/2015/08/06/Activity的LaunchMode与Task/</id>
+    <published>2015-08-05T16:00:00.000Z</published>
+    <updated>2015-12-04T03:19:05.000Z</updated>
+    <content type="html"><![CDATA[<h2 id="1-_什么是Task">1. 什么是Task</h2><p>Task可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：</p>
+<p><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_01.png" alt="Task"><br><a id="more"></a><br>Android里面控制Activity跳转行为的属性有以下几方面</p>
+<h2 id="2-_Activity的四种launch_mode">2. Activity的四种launch mode</h2><p>Launch mode可以分为从AndroidManifest.xml里静态定义或从代码里使用intent的Flag动态定义来实现，其中动态定义的优先级比静态定义要高，若从AndroidManifest.xml里定义，有以下四种：</p>
+<p><code>standard(缺省模式)</code><br>如果没有显式的用android:launchMode来定义，缺省就是这种模式，每次startActivity都会创建一个实例，该实例可以在一个Task中被实例化多次，也可以被实例化到不同的Task中<br>例如在一个Activity里放一个Button，点击该Button时将启动该Activity自己，得到的就是下面的效果。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_02.png" alt="standard mode"></p>
+<blockquote>
+<p><strong>注意</strong>：在Android 5.0之后，同一应用内的Activity启动行为和之前一样，但如果是跨应用启动Activity，则会创建一个新的Task，将刚生成的Activity放入新的Task里，这样在近期任务中的显示会相对合理。</p>
+</blockquote>
+<p><code>singleTop</code><br>如果该Activity位于所在Task栈顶，那么当启动该Activity时不会创建一个新的实例，也就不会重新调用onCreate()方法，而是调用onNewIntent()方法来取而代之，其他情况和standard一致。<br>举个例子：当前有个Task A-B, B位于栈顶，在B上点击某个Button重新启动自己， 如果B是standard模式，Task就会变为A-B-B，如果B为singleTop模式，那么Task仍为A-B，只会调用B的onNewIntent()方法来使B接收intent，但如果B上面还有C，C再启动B，那么无论B是standard还是singleTop，Task都会变为A-B-C-B</p>
+<blockquote>
+<p><strong>注意</strong>：如果一个Activity已经被创建完毕，可以通过按Back键来返回上一个Activity，但如果Activity正在处理intent，是无法通过点击Back键来返回的。</p>
+</blockquote>
+<p><strong>B在栈顶</strong><br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_03.png" alt="B在栈顶"><br><strong>B在栈中</strong><br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_04.png" alt="B在栈中"></p>
+<p><code>singleTask</code><br>在该模式下，如果是同一程序内启动，若之前不存在该Activity实例，那么就会创建一个新的实例和调用者位于同一个Task内，并且处于栈顶位置，如果程序内存在该Activity的实例，那么位于该Activity实例之上的其他Activity实例会被弹出，然后调用该Activity的onNewIntent()方法，如果是跨应用启动，启动一个新的Activiy时会给它创建一个新的Task并把该Activity作为根Activity，如果系统其他Task中存在该Activity的实例，那么就自动跳转到该Task中，如果该Activity上面还有其他Activity的实例，那么其他Activity会被弹出，然后调用该Activity的onNewIntent()方法。</p>
+<blockquote>
+<p><strong>注意</strong>：虽然该Activity在一个新的Task里，但当点击Back键时，还是能够回到调用它的上一个Activity，尽管它们属于不同的Task。<br><strong>注意</strong>：singleTask属性与另一个属性<strong>taskAffinity</strong>息息相关，如果没有明确说明，同一个应用的所有Activity都拥有一个相同的taskAffinity，也就是该应用的包名，在这种情况下，如果当前Task的taskAffinity与该Activity一致，那么直接在该Task中创建，如果不一致则创建一个新的Task。</p>
+</blockquote>
+<p><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_05.png" alt="singleTask"></p>
+<p><code>singleInstance</code><br>和singleTask基本一致，也是新建一个Task，只不过该Task里只有该Activity一个实例，如果在同一个应用里有A，B，C三个Activity，其中B为singleInstance，那么当调用顺序为A-B-C时，A和C在一个Task里，B单独在一个Task里，回退顺序也不同，为C-A-B，如果C再启动B，那么顺序如虚线所示。再次启动B会调用B的onNewIntent()方法。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_06.png" alt="singleInstance"></p>
+<p>若通过intent的Flags来动态定义，有以下几种：</p>
+<blockquote>
+<p> FLAG_ACTIVITY_NEW_TASK<br>和FLAG_ACTIVITY_CLEAR_TOP一起使用时，同singleTask行为一致，否则，若目标Activity没有静态设置singleTask属性，仍然会创建一个新的实例</p>
+<p> FLAG_ACTIVITY_SINGLE_TOP<br>同singleTop行为一致</p>
+<p>FLAG_ACTIVITY_CLEAR_TOP<br>若被启动的Activity已经在当前Task里，那么便不会创建一个新的实例，而是将该Activity之上的Activity全部出站销毁，然后调用该Activity的onNewIntent()方法。</p>
+</blockquote>
+<h3 id="3-_taskAffinity">3. taskAffinity</h3><p>Affinity中文解释是吸引力和亲和性，顾名思义，它是用来将Activity绑在一起的属性，同一Task的所有Activity有相同的affinity，缺省是该Task根Activity的affinity属性。如果不做特殊设置，同一应用里的Activity们拥有相同的affinity，这个affinity通常在application的属性中定义，如果application中也没定义，<strong>那么缺省就是该应用的包名</strong>。你也可以对不同应用的Activity设置同一affinity来使它们位于同一Task内，如果想特别指明某个Activity对任何Task均不存在affinity，那么将其affinity设为空字符串即可。<br>如果一个Intent的Flag被设为了FLAG_ACTIVITY_NEW_TASK，那么对应Activity启动时便会先寻找是否存在taskAffinity相同的Task，如果存在，便将目标Activity压入此Task栈中，如果不存在，则新建一个Task栈并将其放入。</p>
+<h2 id="4-_android:allowTaskReparenting属性">4. android:allowTaskReparenting属性</h2><p>如果某个Activity设置了此属性为true，那么当点击home退到后台时，该Activity将从启动它的task重新宿主到和其affinity相同的task里，举个例子，当某个应用A启动了浏览器或地图中的某个页面，如果该页面的allowTaskReparenting被设为true，那么当该应用A退到后台再启动时，便发现上面的浏览器或地图页面已不再，这时候如果再点击浏览器或地图应用，发现栈顶的Activity就是之前应用A启动的页面。<br><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_07.png" alt="allowTaskReparenting"></p>
+<h2 id="5-_Launch_Mode_总结">5. Launch Mode 总结</h2><blockquote>
+<p> <strong>1、standard</strong><br>    1)从task中启动Activity时，该Activity的新实例总是在当前task中创建<br>    2)每次启动Activity，都会创建该Activity类的新实例<br>    3)一个task中可以存在同一Activity的多个实例<br>    4)一个Activity的多个实例可以出现在多个task栈中<br><strong>2、singleTop</strong><br>    1)如果设置为singleTop的Activity实例未处于栈顶，则其表现与设置为standard的Activity的表现一致<br>    2)如果设置为singleTop的Activity的实例位于任务栈的栈顶，则不会创建该Activity的新实例。只是调用位于栈顶的该Activity实例的onNewIntent方法，将新的intent传递给该实例。<br><strong>3、singleTask</strong><br>    1)设置为singleTask的Activity，具有全局唯一性，在Android系统中只能创建该Activity的一个实例。<br>    2)当启动singleTask的Activity时，如果已经存在该Activity的实例，则将该实例之上的所有Activity实例释放，将该实例重新带回到栈顶，并调用它的onNewIntent方法，将新的intent传递给该实例<br>    3)在创建singleTask模式的Activity的实例时，如果当前task的taskAffinity与该Activity的taskAffinity一致，则直接在当前task中创建;如果当前task的taskAffinity值与该Activity的taskAffinity不一致则在新的任务中创建该Activity的实例。<br><strong>4、singleInstance</strong><br>    1)当创建设置为singleInstance模式的Activity时，总是在新的任务中创建<br>    2)设置为SingleInstance模式的Activity，具有全局唯一性。在Android系统中只能存在该Activity的一个实例<br>    3)设置为singleInstance模式的Activity，总是单独在一个task中存在也就是说在该Activity所在的task栈中不可能存在其他的activity</p>
+</blockquote>
+<h2 id="参考文献：">参考文献：</h2><p><a href="http://developer.android.com/guide/components/tasks-and-back-stack.html" target="_blank" rel="external">http://developer.android.com/guide/components/tasks-and-back-stack.html</a><br><a href="http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html" target="_blank" rel="external">http://www.cnblogs.com/SteveMing/archive/2012/04/24/2459575.html</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6761337" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6761337</a><br><a href="http://blog.csdn.net/liuhe688/article/details/6754323" target="_blank" rel="external">http://blog.csdn.net/liuhe688/article/details/6754323</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h2 id="1-_什么是Task">1. 什么是Task</h2><p>Task可以理解为存储一系列Activity的集合，这些Acitivity之间存在调用关系来共同处理某一具体任务，它们被放在一个称之为回退栈的结构里。通常用户新启动一个应用，系统便会为该应用创建一个Task，启动一个新的Activity是，便会将此Activity放到回退栈里，用户点击Back键返回时，便会将此Activity从回退栈中弹出。如下图所示：</p>
+<p><img src="http://zht7216-github-io.qiniudn.com/20150420_launch_mode_01.png" alt="Task"><br>]]>
+    
+    </summary>
+    
+      <category term="android" scheme="http://yoursite.com/tags/android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Linux系统管理]]></title>
+    <link href="http://yoursite.com/2015/04/09/Linux%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E7%AC%94%E8%AE%B0/"/>
+    <id>http://yoursite.com/2015/04/09/Linux系统管理笔记/</id>
+    <published>2015-04-08T16:00:00.000Z</published>
+    <updated>2015-11-03T08:44:16.000Z</updated>
+    <content type="html"><![CDATA[<p>鉴于近期入职同学较多，相应的Linux服务器和账号的申请及环境搭建工作也随之增加，因此特将之前的一些操作整理出来供其他同学参考, 主要分为磁盘管理，账号创建和工具安装三部分<br><a id="more"></a></p>
+<h2 id="磁盘管理">磁盘管理</h2><h3 id="1-磁盘挂载">1.磁盘挂载</h3><p>刚申请的服务器主硬盘通常只有几十个G的大小，只用来安装Linux系统，用于存放数据的硬盘并没有挂载上去，需要我们自己去分区和格式化，有的服务器有六块1T的数据盘，有的服务器有一块10T大小的数据盘，可以用下面的命令来查看：<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo fdisk -l 查看磁盘挂载信息</span><br><span class="line">sudo fdisk -l <span class="regexp">/dev/</span>sdb 查看某个具体硬盘的挂载信息</span><br><span class="line">df -hT 查看磁盘分区格式，大小，使用率等具体信息</span><br><span class="line">mount <span class="regexp">/dev/</span>sdb1 <span class="regexp">/home/</span>sdb1 挂载硬盘</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-开机自动挂载硬盘">2.开机自动挂载硬盘</h3><p>修改/etc/fstab, 仿照下面样式添加如下行：<br>设备号       挂载点    分区格式</p>
+<p>/dev/sdb1     /media      ext3    defaults,       0       1</p>
+<h3 id="3-磁盘分区及格式化">3.磁盘分区及格式化</h3><p><strong>对于小于2TB的磁盘</strong>，可以用fdisk来格式化<br>先使用 <strong>sudo fdisk -l /dev/sdXXX</strong> 来查看某个硬盘的具体分区信息</p>
+<p>如果没有分区，则会显示:Disk /dev/sdf doesn’t contain a valid partition table等类似信息，</p>
+<p>如果已经分区，则会显示如下分区信息：</p>
+<p>   Device Boot      Start         End      Blocks   Id  System</p>
+<p>/dev/sdf1               1      121601   976760001   83  Linux</p>
+<p>下面使用fdisk命令来给硬盘分区</p>
+<p><strong>sudo fdisk /dev/sdXXX</strong></p>
+<p>会进入fdisk的命令行界面，敲入“m”来查看帮助信息</p>
+<p>键入“n” 来新建分区，(或“d”来删除分区)</p>
+<p>Command (m for help): n</p>
+<p>Command action</p>
+<p>   e   extended</p>
+<p>   p   primary partition (1-4)</p>
+<p>键入“e”来增加一个扩展分区(只能有一个)，或键入“p”来创建一个主分区（最多4个）</p>
+<p>扩展分区不能直接使用，必须在此基础上再划分逻辑分区</p>
+<p>Partition number (1-4): 1<br>输入主分区序号</p>
+<p>First cylinder (1-121601, default 1):</p>
+<p>输入初始柱面号，直接回车使用缺省值</p>
+<p>Using default value 1</p>
+<p>Last cylinder, +cylinders or +size{K,M,G} (1-121601, default 121601):</p>
+<p>输入末尾柱面号，直接回车使用缺省值，或输入目标柱面号，或直接使用+200G来确定新分区的空间<br>Using default value 121601</p>
+<p>Command (m for help): w</p>
+<p>保存退出，如果不想保存退出，直接键入“q”</p>
+<p>这样再使用类似sudo fdisk -l /dev/sdf命令就可以看到新的分区已经建成，序号为/dev/sdf1,如果是扩展分区的逻辑分区，则会从类似dev/sdf5开始</p>
+<p>   Device Boot      Start         End      Blocks   Id  System</p>
+<p>/dev/sdf1               1      121601   976760001   83  Linux</p>
+<p>下面使用mkfs命令来格式化分区</p>
+<p><strong>sudo mkfs.ext3 /dev/sdf1</strong></p>
+<p>也可以使用最新的<strong>mkfs.ext4</strong>来格式化硬盘</p>
+<p>会显示log信息，缺省不需要任何操作，大概1、2分钟后，格式化完成</p>
+<p>下面就是挂载分区了，在你想要挂载的位置新建一个目录，如/home/sdf</p>
+<p><strong>mount -t ext3 /dev/sdf1 /home/sdf</strong></p>
+<p>ext3为你硬盘的分区格式，如果你的硬盘是使用ext4格式化的，这地方就写ext4</p>
+<p>卸载分区</p>
+<p><strong>umount /dev/sdf1或/home/sdf</strong></p>
+<p>设备号或挂载点都可以，但不可以在挂载点目录下执行，不然会报错</p>
+<p><strong>对于大于2TB的磁盘</strong>，如一块10TB大小的硬盘，只能使用<code>parted</code>工具来分区,相关操作可以<a href="http://www.cnblogs.com/joseph-linux/p/3568574.html" target="_blank" rel="external">参考这里</a></p>
+<h2 id="账号管理">账号管理</h2><h3 id="1-创建账号">1.创建账号</h3><p><strong>sudo useradd -s /bin/bash -d <home-dir> -mr XXX</home-dir></strong></p>
+<p>eg:  sudo useradd -s /bin/bash -d /home/sde1/abc -mr abc</p>
+<p>-s 指定使用的shell，不指定的话缺省为/bin/sh，也可以创建完账号后使用chsh -s /bin/bash 来达到同样的效果</p>
+<p>-m 创建账号主目录，默认不创建</p>
+<p>-r 创建系统账号(uid&lt;1000, 非必须)</p>
+<p>注： 在Ubuntu下刚创建的账号并没有在admin group里，因此无法使用sudo命令，需要使用以下命令：<br><strong>sudo usermod -a -G admin XXX</strong> 来将该用户XXX添加到admin的group里，a代表append, 如果用户已经是其他组成员，不想被覆盖掉，就要加上这个参数，可以使用<strong>id</strong>命令来查看用户所在分组</p>
+<h3 id="2-设置密码">2.设置密码</h3><p>刚创建完用户后一定要设置一个密码，不然无法使用</p>
+<p><strong>passwd XXX</strong></p>
+<p>连输入两次密码后才算整个账户创建完毕</p>
+<p>passwd也可以用来更该用户密码，如果某用户忘记了密码，可以让系统管理员使用此命令来更改密码</p>
+<h3 id="3-更改账户">3.更改账户</h3><p><strong>usermod -l u1 user1</strong>  将user1的账户名改为u1</p>
+<p><strong>usermod -d /home/u1 user1</strong>  将user1的用户目录改为/home/u1</p>
+<p>注意，使用完后需使用以下命令将新的用户目录owner改为用户自己，不然用户无法在此目录下添加目录或文件</p>
+<p><strong>sudo chown -R xxx:xxx /home/xxx</strong></p>
+<p><strong>usermod -g users user1</strong> 将user1的账户加入到users用户组中，原来的组会被替换掉</p>
+<p>建议使用 <strong>usermod -a -G admin xxx</strong> 来将用户加入新组，而不是替换组</p>
+<h3 id="4-删除账户">4.删除账户</h3><p><strong>userdel user2</strong>  删除用户user2</p>
+<p><strong>userdel -r user2</strong> 删除用户user2的同时也将其用户目录删除</p>
+<p><strong>userdel -f user3</strong> 强制删除</p>
+<h2 id="工具安装">工具安装</h2><h3 id="1-安装XWindow桌面环境">1.安装XWindow桌面环境</h3><p>缺省的Ubuntu Server版没有提供XWindow桌面环境的，对习惯于在桌面环境下工作的人来说，就需要自己安装一个桌面环境。</p>
+<p><strong>轻量级的桌面环境gnome-core</strong></p>
+<p>apt-get install xserver-xorg</p>
+<p>apt-get install x-window-system-core</p>
+<p>dpkg-reconfigure xserver-xorg</p>
+<p>apt-get install gnome-core</p>
+<p>apt-get install gdm xscreensaver (非必须，gdm是图形化登录框，安装时需要选择Grub)</p>
+<p>apt-get install ttf-arphic*(非必须)</p>
+<p>startx  &amp; (系统每次重启时都需要执行这个操作来启动x-window)</p>
+<p>如果选择了安装gdm，中间可能会弹出界面来选择Grub选项，注意选好，不然重启时可能Grub会起不来导致无法进入系统</p>
+<p>如果不想用gnome了，可以使用以下命令来卸载：</p>
+<p>sudo apt-get –purge remove liborbit2</p>
+<p><strong>原版ubuntu-desktop</strong></p>
+<p>sudo apt-get update</p>
+<p>sudo apt-get install ubuntu-desktop (直接安装ubuntu桌面环境，需要装的东西比较多)</p>
+<p>sudo apt-get -f install</p>
+<p>sudo dpkg-reconfigure ubuntu-desktop</p>
+<p>sudo reboot</p>
+<p>sudo apt-get install gnome-session</p>
+<p>sudo apt-get install lightdm</p>
+<p>sudo apt-get install unity-greeter</p>
+<p>sudo dpkg-reconfigure lightdm</p>
+<h3 id="2-安装VNC">2.安装VNC</h3><p><strong>sudo apt-get install vnc4server</strong></p>
+<p><strong>vncserver -geometry 1600x900</strong></p>
+<p>启动VNCServer，同事设置分辨率大小，如果是第一次使用，会提示创建一个密码，启动成功后会有个数字来表示该VNC的端口，然后在PC端实用VNCViewer，输入XXX:XXX:XXX:XXX:X来登录即可。</p>
+<p>如果启动的VNC环境里只有一个窗口，并无真正的桌面环境，则需要修改xstartup，方法如下<br>vim  ~/.vnc/xstartup<br>将最后一行<code>x-window-manager &amp;</code> 注释掉<br>同时在最下面添加一行 <code>gnome-session &amp;</code><br>如果是12.04以后版本，使用这：<code>gnome-session-fallback &amp;</code><br>然后将原来的VNCServer kill掉，新启动一个VNCServer即可</p>
+<p><strong>vncserver -kill :3</strong> 关掉端口为3的VNCServer</p>
+<h3 id="3-安装samba服务">3.安装samba服务</h3><p>samba可以在将Linux的文件映射到windows端，从而在windows上直观的看到linux里面的内容。<br><strong>安装</strong></p>
+<p>Ubuntu缺省已安装Samba Client,只需要安装server即可</p>
+<p><strong>sudo apt-get install samba</strong></p>
+<p>如果目标机上也没有samba-client的话，使用下面命令安装：</p>
+<p><strong>sudo apt-get install smbclient</strong></p>
+<p>安装后可以查看到samba 服务器已经在后台运行， /etc/init.d/下多了smbd 和<br>nmbd 服务软链接且开机会自动运行。</p>
+<p><strong>配置</strong></p>
+<p>Samba 服务器默认配置文件是/etc/samba/smb.conf 改动前请先做一下备份。<br>在最下方添加如下配置：</p>
+<p>[global]</p>
+<p>security = user</p>
+<p>[xxx_source]</p>
+<p>path = /home/xxx</p>
+<p>writeable = yes</p>
+<p>valid users = xxx</p>
+<p>public = yes</p>
+<p>browseable = yes</p>
+<p>保存退出，检查是否语法有误：testparm（非必须）</p>
+<p><strong>设置密码</strong></p>
+<p>在/etc/samba 下创建smbpasswd 文件</p>
+<p><strong>sudo touch /etc/samba/smbpasswd</strong></p>
+<p>为samba用户设置密码：：</p>
+<p><strong>sudo smbpasswd -a xxx</strong></p>
+<p><strong>重新启动smbd</strong></p>
+<p>重启samba 使配置生效</p>
+<p><strong>sudo /etc/init.d/smbd restart</strong></p>
+<p><strong>windows访问linux的共享目录</strong></p>
+<p>开始–》运行–》\\Linux 的IP 地址，弹出对话框，输入samba密码(非Linux登录密码)</p>
+<p><strong>映射网络驱动器</strong></p>
+<p>右键”我的电脑” –&gt; 映射网络驱动器(N)<br>驱动器随便选一个，文件夹填写Linux 共享文件夹的网络位置：IP+绝对路径。 斜杠用(如：\\192.168.1.1\xxx_source)<br>断开网络驱动器：右键我的电脑–&gt; 断开网络驱动器</p>
+<h3 id="4-更新JDK">4.更新JDK</h3><p>如果原来机器上的JDK版本比较低，需要升级到较高的版本才能使得Android编译通过，更新JDK版本的方法可以<a href="http://blog.csdn.net/lyb2518/article/details/7362648" target="_blank" rel="external">参考这里</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>鉴于近期入职同学较多，相应的Linux服务器和账号的申请及环境搭建工作也随之增加，因此特将之前的一些操作整理出来供其他同学参考, 主要分为磁盘管理，账号创建和工具安装三部分<br>]]>
+    
+    </summary>
+    
+      <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识]]></title>
+    <link href="http://yoursite.com/2014/09/12/%E7%94%B1MTK%E5%9C%A8Android4.4%E4%B8%AD%E5%AF%B9getMemoryInfo%E7%9A%84%E6%94%B9%E5%8A%A8%E5%8F%91%E7%8E%B0%E7%9A%84ZRAM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/"/>
+    <id>http://yoursite.com/2014/09/12/由MTK在Android4.4中对getMemoryInfo的改动发现的ZRAM相关知识/</id>
+    <published>2014-09-11T16:00:00.000Z</published>
+    <updated>2015-11-03T08:44:58.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="缘起">缘起</h3><p>在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。</p>
+<h3 id="调查">调查</h3><p>Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看<code>/proc/meminfo</code>里面的MemFree和Cached的总和(不包括Buffers)作为剩余可用内存，其他安全类应用也大都采用了此类方法，但从Android4.4开始，发现MTK在ActivityManagerService.java里加了一些改动<br><a id="more"></a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getMemoryInfo</span><span class="params">(ActivityManager.MemoryInfo outInfo)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> homeAppMem = mProcessList.getMemLevel(ProcessList.HOME_APP_ADJ);</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">long</span> cachedAppMem = mProcessList.getMemLevel(ProcessList.CACHED_APP_MIN_ADJ);</span><br><span class="line">    outInfo.availMem = Process.getFreeMemory();</span><br><span class="line">    outInfo.totalMem = Process.getTotalMemory();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// M: We should consider ZRAM for LCA @&#123;</span></span><br><span class="line">    <span class="keyword">if</span> (FeatureOption.MTK_MEMORY_COMPRESSION_SUPPORT) &#123;</span><br><span class="line">        outInfo.availMem += Process.getZramExtraAvailableSize();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">///  @&#125;</span></span><br><span class="line"></span><br><span class="line">    outInfo.threshold = homeAppMem;</span><br><span class="line">    outInfo.lowMemory = outInfo.availMem &lt; (homeAppMem + ((cachedAppMem-homeAppMem)/<span class="number">2</span>));</span><br><span class="line">    outInfo.hiddenAppThreshold = cachedAppMem;</span><br><span class="line">    outInfo.secondaryServerThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.SERVICE_ADJ);</span><br><span class="line">    outInfo.visibleAppThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.VISIBLE_APP_ADJ);</span><br><span class="line">    outInfo.foregroundAppThreshold = mProcessList.getMemLevel(</span><br><span class="line">            ProcessList.FOREGROUND_APP_ADJ);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>FeatureOption.MTK_MEMORY_COMPRESSION_SUPPORT</code>缺省是设为TRUE的，也就是说在MTK版的Android4.4上，availMem的值等于原来getFreeMemeory()的值加上<strong>zRAM</strong>的额外可用空间的值。</p>
+<h3 id="推测结论">推测结论</h3><p>腾讯手机管家和百度杀毒卫士仍然使用原来的通过查看/proc/meminfo的方法来计算剩余可用内存，而我们采用的时ActivityManager的getMemoryInfo来获取的剩余可用内存，中间差了一个<strong>zRAM</strong>，这就是差距如此悬殊的原因。而<strong>zRAM</strong>又为何物呢？</p>
+<h4 id="以下是来自维基百科上的解释">以下是来自维基百科上的解释</h4><blockquote>
+<p>zRAM是Linux内核的一个模块，之前被称为“compcache”。zram通过在RAM内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于zram可以用内存替代硬盘为系统提供交换空间的功能，zram可以让Linux在需要大量RAM的情况下在内存上进行交换/分页，而提高内存的使用率，显著得减少系统启动时（此时Linux还不能使用外部存储）对内存大小的要求。在物理内存较少的旧电脑上，尤其如此。即使RAM的价格比较低，这项功能仍对上网本和其他低功率的笔记本电脑、虚拟化有优势，尤其是那些使用闪存的嵌入式设备，其寿命有限且依赖于使用频率，因此用作交换时磨损得很快。</p>
+</blockquote>
+<p>因此可以理解为zRAM是将内存来替代磁盘作为Linux的交换分区，并对其存放的内容进行实时压缩以达到提高系统实际内存容量的目的。举个例子，如果有一部内存为512M的手机，开启了zRAM，根据官方的建议，zRAM大小设为总内存的25%，也就是128M，压缩比率为1/3，那么理论上可用的内存空间就变成了768M</p>
+<p>zRAM的技术特点可以看<a href="http://wiki.gentoo.org/wiki/Zram" target="_blank" rel="external">这里</a>，它的前身叫<a href="https://code.google.com/p/compcache/" target="_blank" rel="external">compcache</a>，从09年就在Android的民间开发社区CM上流传开来，在某些论坛里已经有基于Android2.3.x的支持zRAM的内核流出供刷机使用，但效果有限，google直到kitkat(内核版本3.4)才将其正式引入，其实从Linux 3.2版本开始zRAM已经进入内核的staging driver，亦即是处于测试阶段。根据最新的消息，ZRAM将最终将作为Linux Kernel 3.14正式版本的一部分</p>
+<p>zRAM的优点显而易见，通过压缩页面让系统内存更加有效，缺点是增加了CPU的开销，但在目前CPU性能已不是瓶颈的时代，这也不失为一种好的方法。Mac OSX10.9中也采用了类似的技术。</p>
+<h4 id="参考文献：">参考文献：</h4><p><a href="http://www.zhihu.com/question/21932664/answer/19779653" target="_blank" rel="external">http://www.zhihu.com/question/21932664/answer/19779653</a></p>
+<p><a href="http://zh.wikipedia.org/wiki/Zram" target="_blank" rel="external">http://zh.wikipedia.org/wiki/Zram</a></p>
+<p><a href="http://jingyan.baidu.com/article/1612d50079a8e5e20e1eee98.html" target="_blank" rel="external">http://jingyan.baidu.com/article/1612d50079a8e5e20e1eee98.html</a></p>
+<p><a href="http://zhuanlan.zhihu.com/iobject/19608629" target="_blank" rel="external">http://zhuanlan.zhihu.com/iobject/19608629</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h3 id="缘起">缘起</h3><p>在调试手机的时候发现自己写的应用里获取手机剩余内存的值比腾讯手机管家或百度手机卫士的值要多出不少，在一款512M内存的手机上，我们的应用显示内存占用率为60%时，腾讯手机管家和百度手机卫士却已显示为85%左右。</p>
+<h3 id="调查">调查</h3><p>Android获取内存总大小及剩余可用空间的方法为ActivityManager的getMemoryInfo()，它的本质上还是通过JNI调用来查看<code>/proc/meminfo</code>里面的MemFree和Cached的总和(不包括Buffers)作为剩余可用内存，其他安全类应用也大都采用了此类方法，但从Android4.4开始，发现MTK在ActivityManagerService.java里加了一些改动<br>]]>
+    
+    </summary>
+    
+      <category term="android" scheme="http://yoursite.com/tags/android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <link href="http://yoursite.com/2014/05/12/hello-world/"/>
+    <id>http://yoursite.com/2014/05/12/hello-world/</id>
+    <published>2014-05-11T16:00:00.000Z</published>
+    <updated>2015-11-17T09:42:55.000Z</updated>
+    <content type="html"><![CDATA[<p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
+<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Welcome to <a href="http://hexo.io/">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.<br>]]>
+    
+    </summary>
+    
+  </entry>
+  
+</feed>
